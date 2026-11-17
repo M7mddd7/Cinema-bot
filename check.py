@@ -12,8 +12,8 @@ html = requests.get(URL, timeout=20, headers={"User-Agent":
 soup = BeautifulSoup(html, "html.parser")
 
 movies = {}
-for a in soup.select('a[href*="/movie-details/"]'):
-    name = a.get("title") or a.get_text(strip=True)
+for a in soup.select('h3 a[href*="/movies/"]'):
+    name = a.get_text(strip=True)
     if name:
         movies[a["href"]] = name
 
@@ -30,6 +30,7 @@ if seen is not None:
             f"https://api.telegram.org/bot{TOKEN}/sendMessage",
             params={"chat_id": CHAT_ID,
                     "text": f"فيلم جديد نزل: {movies[href]}\n{urljoin(URL, href)}"},
+            timeout=20,
         )
 
 json.dump(sorted((seen or set()) | set(movies)), open(FILE, "w"),

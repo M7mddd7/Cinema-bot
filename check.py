@@ -18,3 +18,19 @@ for a in soup.select('a[href*="/movie-details/"]'):
         movies[a["href"]] = name
 
 print("لقيت", len(movies), "فيلم")
+
+if not movies:
+    sys.exit("مفيش أفلام اتقرأت")
+
+seen = set(json.load(open(FILE))) if os.path.exists(FILE) else None
+
+if seen is not None:
+    for href in movies.keys() - seen:
+        requests.get(
+            f"https://api.telegram.org/bot{TOKEN}/sendMessage",
+            params={"chat_id": CHAT_ID,
+                    "text": f"فيلم جديد نزل: {movies[href]}\n{urljoin(URL, href)}"},
+        )
+
+json.dump(sorted((seen or set()) | set(movies)), open(FILE, "w"),
+          ensure_ascii=False)
